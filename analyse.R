@@ -1,7 +1,7 @@
 library(ggplot2)
 library(ggpubr)
 
-expt = "sample"
+expt = "turnover"
 
 if(expt == "sample") {
   df = read.csv("output-sample.csv")
@@ -53,9 +53,10 @@ ggplot() +
   geom_point(data=df[df$t == max(df$t),], aes(x=Eh, y=Vph, shape=factor(nstar), group=paste(ds,h0))) +
   theme_minimal()
 
+df.sub = df[df$ds %in% c(-0.25, 0, 0.25) & df$h0 %in% c(0.1, 0.5, 0.9),]
 g.sd = ggplot() +
-  geom_line(data=df, aes(x=Eh, y=SDh, color=factor(ds), group=paste(nstar, ds, h0))) +
-  geom_point(data=df[df$t == max(df$t),], size=3, aes(x=Eh, y=SDh, color=factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
+  geom_line(data=df.sub, aes(x=Eh, y=SDh, color=factor(ds), group=paste(nstar, ds, h0))) +
+  geom_point(data=df.sub[df.sub$t == max(df.sub$t),], size=3, aes(x=Eh, y=SDh, color=factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
   theme_minimal()
 print(g.sd)
 
@@ -74,10 +75,19 @@ g.vp1 + scale_y_log10()
 
 sf = 2
 png(paste0("set-illus-", expt, ".png", collapse=""), width=600*sf, height=600*sf, res=72*sf)
-ggarrange(g.sd,
-          ggarrange(g.vp, g.vp1, nrow=1), nrow=2)
+ggarrange(g.sd, g.vp1 + scale_y_log10(), nrow=1)
 dev.off()
 
-g.ts = ggplot(df, aes(x = t, y=Eh))
-ggplot(df, aes(x=Eh, y=Vph/(t/nstar), color=factor(ds), fill=factor(nstar), group=h0)) +
-  geom_point(shape=21)
+if(expt == "turnover") {
+  dfh = read.csv("output-turnover-hist.csv")
+  dfsub = dfh[dfh$nstar == 40 & dfh$ds %in% c(-0.25, 0, 0.25) & dfh$t %in% c(0, 9, 99, 999),]
+  g.hist.1 = ggplot(dfsub, aes(xmin=h, ymin=log10(t+1), xmax=h+0.025, ymax=Ph/1000+log10(t+1), 
+                  fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
+  dfsub1 = dfh[dfh$nstar == 640 & dfh$ds %in% c(-0.25, 0, 0.25) & dfh$t %in% c(0, 9, 99, 999),]
+  g.hist.2 = ggplot(dfsub1, aes(xmin=h, ymin=log10(t+1), xmax=h+0.025, ymax=Ph/1000+log10(t+1), 
+                    fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
+  sf = 2
+  png(paste0("set-hist-", expt, ".png", collapse=""), width=800*sf, height=600*sf, res=72*sf)
+  ggarrange(g.hist.1, g.hist.2, nrow=2)
+  dev.off()
+}
