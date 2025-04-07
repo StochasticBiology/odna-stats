@@ -55,7 +55,7 @@ int main(void)
 
 		      r = RND; r2 = RND;
 		      if(r < rates[0]) w++; else m++;
-		      if(r2 < rates[0]) w--; else m--;
+		      if(r2 < (double)w/(w+m)) w--; else m--;
 		    }
 		}
 	      for(div = 0; div < MAXT*nstar; div++)
