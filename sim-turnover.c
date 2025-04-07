@@ -31,7 +31,7 @@ int main(void)
   nset = (double*)malloc(sizeof(double)*MAXT*NREP);
 
   srand48(12);
-  fp = fopen("output.csv", "w");
+  fp = fopen("output-turnover.csv", "w");
   fprintf(fp, "ds,nstar,h0,t,Eh,SDh,En,SDn\n");
   ds = 0;
   for(ds = -0.5; ds <= 0.5; ds += 0.125)
