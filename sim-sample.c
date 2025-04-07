@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define RND drand48()
-#define MAXT 1000
+#define MAXT 100
 #define NREP 1000
 
 int main(void)
@@ -48,6 +48,7 @@ int main(void)
 		  m = round(nstar*h0);
 		  for(div = 0; div < 100; div++)
 		    {
+		      hset[rep*MAXT+div] = (double)m/(w+m);
 		      neww = newm = 0;
 		      for(i = 0; i < nstar/2; i++)
 			{
@@ -60,7 +61,7 @@ int main(void)
 			  if(r < rates[0]) neww++;
 			  else newm++;
 			}
-		      hset[rep*MAXT+div] = (double)m/(w+m);
+		      w = neww; m = newm;
 		    }
 		}
 	      for(div = 0; div < MAXT; div++)
