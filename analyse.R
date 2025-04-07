@@ -1,7 +1,7 @@
 library(ggplot2)
 library(ggpubr)
 
-expt = "turnover"
+expt = "sample"
 
 if(expt == "sample") {
   df = read.csv("output-sample.csv")
@@ -36,6 +36,12 @@ g.v0ts = ggplot() +
   theme_minimal()
 g.v0ts
 
+g.ets = ggplot() +
+  geom_line(data=df, aes(x=t, y=Eh, color=factor(ds), group=paste(nstar, h0))) +
+  geom_point(data=df[df$t == max(df$t),], size=3, aes(x=t, y=Eh, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
+  facet_wrap(~ ds) +
+  theme_minimal()
+g.ets
 g.vts = ggplot() +
   geom_line(data=df, aes(x=t, y=Vph*nstar, color=factor(ds), group=paste(nstar, h0))) +
   geom_point(data=df[df$t == max(df$t),], size=3, aes(x=t, y=Vph*nstar, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
@@ -74,8 +80,8 @@ print(g.vp1)
 g.vp1 + scale_y_log10()
 
 sf = 2
-png(paste0("set-illus-", expt, ".png", collapse=""), width=600*sf, height=600*sf, res=72*sf)
-ggarrange(g.sd, g.vp1 + scale_y_log10(), nrow=1)
+png(paste0("set-illus-", expt, ".png", collapse=""), width=800*sf, height=800*sf, res=72*sf)
+ggarrange(g.ets, g.vts, g.sd, g.vp1 + scale_y_log10(), nrow=2, ncol=2)
 dev.off()
 
 if(expt == "turnover") {
