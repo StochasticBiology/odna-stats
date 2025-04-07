@@ -73,7 +73,7 @@ print(g.vp1)
 g.vp1 + scale_y_log10()
 
 sf = 2
-png(paste0("set-illus-", expt", .png", collapse=""), width=600*sf, height=600*sf, res=72*sf)
+png(paste0("set-illus-", expt, ".png", collapse=""), width=600*sf, height=600*sf, res=72*sf)
 ggarrange(g.sd,
           ggarrange(g.vp, g.vp1, nrow=1), nrow=2)
 dev.off()

@@ -26,6 +26,9 @@ int main(void)
   int tmpt, lastt, nextt;
   double dt;
   double meanh;
+  int hist[101];
+  
+  FILE *fp1;
   
   hset = (double*)malloc(sizeof(double)*MAXT*NREP);
   nset = (double*)malloc(sizeof(double)*MAXT*NREP);
@@ -33,6 +36,8 @@ int main(void)
   srand48(12);
   fp = fopen("output-turnover.csv", "w");
   fprintf(fp, "ds,nstar,h0,t,Eh,SDh,En,SDn\n");
+  fp1 = fopen("output-turnover-hist.csv", "w");
+  fprintf(fp1, "ds,nstar,h0,t,h,Ph\n");
   ds = 0;
   for(ds = -0.5; ds <= 0.5; ds += 0.125)
     {
@@ -82,14 +87,21 @@ int main(void)
 		{
 		  sumh = sumh2 = 0;
 		  sumn = sumn2 = 0;
+		  for(i = 0; i < 101; i++) hist[i] = 0;
 		  for(rep = 0; rep < NREP; rep++)
 		    {
 		      sumh += hset[rep*MAXT+lastt];
 		      sumh2 += hset[rep*MAXT+lastt]*hset[rep*MAXT+lastt];
 		      sumn += nset[rep*MAXT+lastt];
 		      sumn2 += nset[rep*MAXT+lastt]*nset[rep*MAXT+lastt];
+		      hist[(int)round(hset[rep*MAXT+lastt]*100)]++;
 		    }
 		  fprintf(fp, "%f,%i,%f,%i,%f,%f,%f,%f\n", ds, nstar, h0, lastt, sumh/NREP, sqrt( sumh2/NREP - (sumh/NREP)*(sumh/NREP) ), sumn/NREP, sqrt( sumn2/NREP - (sumn/NREP)*(sumn/NREP) ));
+		  for(i = 0; i < 101; i++)
+		    {
+		      if(hist[i] != 0)
+			fprintf(fp1, "%f,%i,%f,%i,%f,%i\n", ds, nstar, h0, lastt, (double)i/100., hist[i]);
+		    }
 		}
 	    }
 	}
