@@ -2,6 +2,7 @@ library(ggplot2)
 library(ggpubr)
 
 expt = "sample"
+expt = "turnover"
 
 if(expt == "sample") {
   df = read.csv("output-sample.csv")
@@ -99,4 +100,45 @@ if(expt == "turnover") {
   png(paste0("set-hist-", expt, ".png", collapse=""), width=800*sf, height=600*sf, res=72*sf)
   ggarrange(g.hist.1, g.hist.2, nrow=2)
   dev.off()
+}
+
+if(expt == "sample") {
+  ngen = 100
+  ndf = data.frame(neff = rep(c(40, 160, 640, 2560), each=ngen+1),
+                   gen = rep(0:ngen, 4))
+  ndf$simp = ndf$gen*(1/ndf$neff)
+  # Wright formula (1942)
+  ndf$wright = (1-(1-1/ndf$neff)**ndf$gen)
+  ggplot(ndf) + 
+    geom_line(aes(x=gen, y=simp, color=factor(neff))) + 
+    geom_point(aes(x=gen, y=wright, color=factor(neff)))
+  ggplot(ndf) + 
+    geom_line(aes(x=gen, y=simp*neff, color=factor(neff))) + 
+    geom_point(aes(x=gen, y=wright*neff, color=factor(neff)))
+  # if we can estimate an effective n for a short timescale, can we use this to generalise away from the approximation?
+  dfsub = df[df$ds == 0 & df$h0 == 0.5 & df$nstar %in% c(40, 160, 640, 2560) & df$t < ngen,]
+  ggplot() +
+    geom_line(data=dfsub, aes(x = t, y = Vph, colour = factor(nstar))) + 
+    geom_point(data=ndf, size = 0.2, aes(x=gen, y=wright, color=factor(neff)))
+}
+
+if(expt == "turnover") {
+  ngen = 500
+  ndf = data.frame(neff = rep(c(40, 160, 640, 2560)/(2*0.1), each=ngen+1),
+                   gen = rep(0:ngen, 4))
+  ndf$simp = ndf$gen*(1/ndf$neff)
+  # Wright formula (1942)
+  ndf$wright = (1-(1-1/ndf$neff)**ndf$gen)
+  ggplot(ndf) + 
+    geom_line(aes(x=gen, y=simp, color=factor(neff))) + 
+    geom_point(aes(x=gen, y=wright, color=factor(neff)))
+  ggplot(ndf) + 
+    geom_line(aes(x=gen, y=simp*neff, color=factor(neff))) + 
+    geom_point(aes(x=gen, y=wright*neff, color=factor(neff)))
+  # if we can estimate an effective n for a short timescale, can we use this to generalise away from the approximation?
+  dfsub = df[df$ds == 0 & df$h0 == 0.1 & df$nstar %in% c(40, 160, 640, 2560) & df$t < ngen,]
+  ggplot() +
+    geom_line(data=dfsub, aes(x = t, y = Vph, colour = factor(nstar))) + 
+    geom_point(data=ndf, size = 0.2, aes(x=gen, y=wright, color=factor(neff)))
+  ## ^ yes we can! just consider effective N for one time unit, then stack results in Wright formula
 }

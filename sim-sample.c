@@ -46,11 +46,11 @@ int main(void)
 		{
 		  w = round(nstar*(1.-h0));
 		  m = round(nstar*h0);
-		  for(div = 0; div < 100; div++)
+		  for(div = 0; div < MAXT; div++)
 		    {
 		      hset[rep*MAXT+div] = (double)m/(w+m);
 		      neww = newm = 0;
-		      for(i = 0; i < nstar/2; i++)
+		      for(i = 0; i < nstar; i++)
 			{
 			  rates[0] = w*(lambda-ds*lambda);
 			  rates[1] = m*(lambda+ds*lambda);
