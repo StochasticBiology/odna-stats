@@ -5,9 +5,12 @@ expt = "sample"
 
 if(expt == "sample") {
   df = read.csv("output-sample.csv")
-} else {
+} else if(expt == "turnover") {
   df = read.csv("output-turnover.csv")
+} else if(expt == "moran") {
+  df = read.csv("output-moran.csv")
 }
+  
 df$Vph = (df$SDh)**2/(df$Eh*(1-df$Eh))
 
 ggplot(df, aes(x=t, y=Eh, color=factor(ds))) + geom_line() + facet_grid(h0 ~ nstar)
