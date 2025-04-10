@@ -28,7 +28,6 @@ int main(void)
   int tmpt, lastt, nextt;
   double dt;
   double meanh;
-  int hist[101];
   
   FILE *fp1;
   
@@ -51,9 +50,31 @@ int main(void)
 		{
 		  w = round(nstar*(1.-h0));
 		  m = round(nstar*h0);
-		  lastt = 0;
+		  lastt = 0; dt = 0;
 		  for(t=0;t<MAXT;)
 		    {
+		      // cell divisions
+		      if(t > 0 && (int)(t) % 10 == 0 && (int)(t-dt) % 10 != 0)
+			{
+			  //			  printf("division at %f\n", t);
+			  switch(expt)
+			    {
+			    case 0: break;
+			    case 1: w = round((double)w/2.); m = round((double)m/2.); break;
+			    case 2: w = round((double)w/5.); m = round((double)m/5.); break;
+			    case 3: neww = newm = 0;
+			      for(i = 0; i < w; i++) neww += (RND < 0.5);
+			      for(i = 0; i < m; i++) newm += (RND < 0.5);
+			      w = neww; m = newm;
+			      break;
+			    case 4: neww = newm = 0;
+			      for(i = 0; i < w; i++) neww += (RND < 0.2);
+			      for(i = 0; i < m; i++) newm += (RND < 0.2);
+			      w = neww; m = newm;
+			      break;
+			    }
+			}
+
 		      rates[0] = w*(lambda-ds*lambda)*(1 - (w+m)/nstar);
 		      rates[1] = m*(lambda+ds*lambda)*(1 - (w+m)/nstar);
 		      rates[2] = w*nu;
@@ -75,48 +96,25 @@ int main(void)
 			    }
 			}
 		      t += dt;
-
-		      // cell divisions
-		      if((int)(t+dt) % 10 == 0 && (int)t % 10 != 0)
-			{
-			  switch(expt)
-			    {
-			    case 0: break;
-			    case 1: w = round((double)w/2.); m = round((double)m/2.); break;
-			    case 2: w = round((double)w/5.); m = round((double)m/5.); break;
-			    case 3: neww = newm = 0;
-			      for(i = 0; i < w; i++) neww += (RND < 0.5);
-			      for(i = 0; i < m; i++) newm += (RND < 0.5);
-			      w = neww; m = newm;
-			      break;
-			    case 4: neww = newm = 0;
-			      for(i = 0; i < w; i++) neww += (RND < 0.2);
-			      for(i = 0; i < m; i++) newm += (RND < 0.2);
-			      w = neww; m = newm;
-			      break;
-			    }
-			}
 		      
 		      r = RND;
 		      if(r < rates[0]) w++;
 		      else if(r < rates[0]+rates[1]) m++;
 		      else if(r < rates[0]+rates[1]+rates[2]) w--;
 		      else m--;
-		      if(w+m == 0 || w < 0 || m < 0) { printf("wtf\n"); }
+		      if(w < 0 || m < 0) { printf("wtf\n"); }
 		    }
 		}
 	      for(lastt = 0; lastt < MAXT; lastt++)
 		{
 		  sumh = sumh2 = 0;
 		  sumn = sumn2 = 0;
-		  for(i = 0; i < 101; i++) hist[i] = 0;
 		  for(rep = 0; rep < NREP; rep++)
 		    {
 		      sumh += hset[rep*MAXT+lastt];
 		      sumh2 += hset[rep*MAXT+lastt]*hset[rep*MAXT+lastt];
 		      sumn += nset[rep*MAXT+lastt];
 		      sumn2 += nset[rep*MAXT+lastt]*nset[rep*MAXT+lastt];
-		      hist[(int)round(hset[rep*MAXT+lastt]*100)]++;
 		    }
 		  fprintf(fp, "%i,%i,%f,%i,%f,%f,%f,%f\n", expt, nstar, h0, lastt, sumh/NREP, sqrt( sumh2/NREP - (sumh/NREP)*(sumh/NREP) ), sumn/NREP, sqrt( sumn2/NREP - (sumn/NREP)*(sumn/NREP) ));
 		}
