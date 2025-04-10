@@ -181,20 +181,20 @@ if(expt == "general") {
   tmpdf$nturn = tmpdf$neff/(2*0.1)
   # Wright formula (1942)
   
-  ##### this is not correctly capturing the behaviour yet
+  ##### this is not QUITE correctly capturing the behaviour yet -- but getting there
   if(expt == 0) {
     tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen)
   } else if(expt == 1) {
-    delta = 0.5* ( 1/(tmpdf$neff/2) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
-  } else if(expt == 2) {
-    delta = 0.5* ( 1/(tmpdf$neff/5) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
-  } else if(expt == 3) {
     delta = 1* ( 1/(tmpdf$neff/2) - (1/tmpdf$neff) )
     tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
-  } else if(expt == 4) {
+  } else if(expt == 2) {
     delta = 1* ( 1/(tmpdf$neff/5) - (1/tmpdf$neff) )
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+  } else if(expt == 3) {
+    delta = 2* ( 1/(tmpdf$neff/2) - (1/tmpdf$neff) )
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+  } else if(expt == 4) {
+    delta = 2* ( 1/(tmpdf$neff/5) - (1/tmpdf$neff) )
     tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
   }
   tmpdf$ds = expt
@@ -211,6 +211,6 @@ if(expt == "general") {
   ggplot() +
     geom_line(data=ndf, aes(x=gen, y=wright, color=factor(neff))) + 
     geom_point(data=dfsub, size=0.2, aes(x = t, y = Vph, colour = factor(nstar))) + 
-    facet_wrap( ~ ds) + xlim(0,40)
+    facet_wrap( ~ ds) + xlim(0,50)
   ## ^ yes we can! just consider effective N for one time unit, then stack results in Wright formula
 }

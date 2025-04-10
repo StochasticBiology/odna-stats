@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define RND drand48()
-#define MAXT 50
+#define MAXT 200
 #define NREP 1000
 
 int main(void)
