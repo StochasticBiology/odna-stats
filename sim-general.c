@@ -60,8 +60,8 @@ int main(void)
 			  switch(expt)
 			    {
 			    case 0: break;
-			    case 1: w = round((double)w/2.)*2; m = round((double)m/2.); break;
-			    case 2: w = round((double)w/5.)*2; m = round((double)m/5.); break;
+			    case 1: w = round((double)w/2.); m = round((double)m/2.); break;
+			    case 2: w = round((double)w/5.); m = round((double)m/5.); break;
 			    case 3: neww = newm = 0;
 			      for(i = 0; i < w; i++) neww += (RND < 0.5);
 			      for(i = 0; i < m; i++) newm += (RND < 0.5);
