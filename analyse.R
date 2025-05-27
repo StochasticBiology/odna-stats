@@ -98,13 +98,44 @@ if(expt == "turnover") {
   dfh = read.csv("output-turnover-hist.csv")
   dfsub = dfh[dfh$nstar == 40 & dfh$ds %in% c(-0.25, 0, 0.25) & dfh$t %in% c(0, 9, 99, 999),]
   g.hist.1 = ggplot(dfsub, aes(xmin=h, ymin=log10(t+1), xmax=h+0.025, ymax=Ph/1000+log10(t+1), 
-                  fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
+                               fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
   dfsub1 = dfh[dfh$nstar == 640 & dfh$ds %in% c(-0.25, 0, 0.25) & dfh$t %in% c(0, 9, 99, 999),]
   g.hist.2 = ggplot(dfsub1, aes(xmin=h, ymin=log10(t+1), xmax=h+0.025, ymax=Ph/1000+log10(t+1), 
-                    fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
+                                fill=factor(t+1))) + geom_rect() + theme_minimal() + facet_grid(ds ~ h0)  
   sf = 2
   png(paste0("set-hist-", expt, ".png", collapse=""), width=800*sf, height=600*sf, res=72*sf)
   ggarrange(g.hist.1, g.hist.2, nrow=2)
+  dev.off()
+  
+  dfsub = dfh[dfh$nstar == 40 & 
+                dfh$ds %in% c(-0.25, 0, 0.25) & 
+                dfh$t %in% c(0, 9, 99, 999) &
+                dfh$h0 %in% c(0.5,0.9),]
+  
+  elem.plot = function(tdf) {
+    return(
+      ggplot(tdf, aes(xmin=h, ymin=0, xmax=h+0.03, ymax=Ph)) + 
+        xlim(-0.05,1.05) +facet_wrap(~(t+1), ncol=1, scales = "free_y")  +
+        geom_rect() + theme_classic() + labs(x="h") +
+        theme(
+          strip.background = element_blank(),     # remove facet label box
+          strip.text = element_text(face = "bold"), # optional: tweak facet label text
+          axis.ticks.y = element_blank(),         # remove y-axis ticks
+          axis.text.y = element_blank(),          # remove y-axis text
+          axis.line.y = element_blank()           # optionally remove y-axis line
+        )
+    )
+  }
+  
+  g.illus = ggarrange(elem.plot(dfsub[dfsub$ds == 0 & dfsub$h0 == 0.5,]),
+                      elem.plot(dfsub[dfsub$ds == 0 & dfsub$h0 == 0.9,]),
+                      elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.5,]),
+                      elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.9,]),
+                      labels = c("A", "B", "C", "D"))
+  
+  sf = 2
+  png(paste0("set-hist2-", expt, ".png", collapse=""), width=400*sf, height=400*sf, res=72*sf)
+  print(g.illus)
   dev.off()
 }
 
@@ -182,20 +213,21 @@ if(expt == "general") {
   # Wright formula (1942)
   
   ##### this is not QUITE correctly capturing the behaviour yet -- but getting there
+  # some dt=1 issues perhaps -- turnover vs cell division timescales?
   if(expt == 0) {
     tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen)
   } else if(expt == 1) {
     delta = 1* ( 1/(tmpdf$neff/2) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor((tmpdf$gen-0)/10))
   } else if(expt == 2) {
     delta = 1* ( 1/(tmpdf$neff/5) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor((tmpdf$gen-0)/10))
   } else if(expt == 3) {
     delta = 2* ( 1/(tmpdf$neff/2) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor((tmpdf$gen-0)/10))
   } else if(expt == 4) {
     delta = 2* ( 1/(tmpdf$neff/5) - (1/tmpdf$neff) )
-    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor(tmpdf$gen/10))
+    tmpdf$wright = (1-(1-1/tmpdf$nturn)**tmpdf$gen*(1-delta)**floor((tmpdf$gen-0)/10))
   }
   tmpdf$ds = expt
   ndf = rbind(ndf, tmpdf)
@@ -211,6 +243,6 @@ if(expt == "general") {
   ggplot() +
     geom_line(data=ndf, aes(x=gen, y=wright, color=factor(neff))) + 
     geom_point(data=dfsub, size=0.2, aes(x = t, y = Vph, colour = factor(nstar))) + 
-    facet_wrap( ~ ds) + xlim(0,50)
+    facet_wrap( ~ ds) + xlim(0,50) 
   ## ^ yes we can! just consider effective N for one time unit, then stack results in Wright formula
 }
