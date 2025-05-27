@@ -40,18 +40,19 @@ ggplot(df, aes(x=t, y=Vph, color=factor(ds), group=paste(nstar,h0))) +
   geom_line() + facet_grid(nstar~ ds) + xlim(0,10)
 
 g.v0ts = ggplot() +
-  geom_line(data=df, aes(x=t, y=Vph, color=factor(ds), group=paste(nstar, h0))) +
-  geom_point(data=df[df$t == max(df$t),], size=3, aes(x=t, y=Vph, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
-  facet_wrap(~ ds) +
+  geom_line(data=df[df$nstar < 2000 & !is.na(df$Vph),], aes(x=t, y=Vph, color=factor(ds), group=paste(nstar, h0))) +
+  geom_point(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$t %in% c(150,max(df$t)),], size=3, aes(x=t, y=Vph, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
+  facet_wrap(~ ds) + labs(x="t", y="Var'(h)",  shape="N") +guides(colour = "none") +
   theme_minimal()
 g.v0ts
 
 g.ets = ggplot() +
-  geom_line(data=df, aes(x=t, y=Eh, color=factor(ds), group=paste(nstar, h0))) +
-  geom_point(data=df[df$t == max(df$t),], size=3, aes(x=t, y=Eh, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
-  facet_wrap(~ ds) +
+  geom_line(data=df[df$nstar < 2000 & !is.na(df$Vph),], aes(x=t, y=Eh, color=factor(ds), group=paste(nstar, h0))) +
+  geom_point(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$t %in% c(150,max(df$t)),], size=3, aes(x=t, y=Eh, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
+  facet_wrap(~ ds) + labs(x="t", y="E(h)",  shape="N") +guides(colour = "none") +
   theme_minimal()
 g.ets
+
 g.vts = ggplot() +
   geom_line(data=df, aes(x=t, y=Vph*nstar, color=factor(ds), group=paste(nstar, h0))) +
   geom_point(data=df[df$t == max(df$t),], size=3, aes(x=t, y=Vph*nstar, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
@@ -69,12 +70,23 @@ ggplot() +
   geom_point(data=df[df$t == max(df$t),], aes(x=Eh, y=Vph, shape=factor(nstar), group=paste(ds,h0))) +
   theme_minimal()
 
-df.sub = df[df$ds %in% c(-0.25, 0, 0.25) & df$h0 %in% c(0.1, 0.5, 0.9),]
+df.sub = df[df$ds %in% c(-0.25, 0, 0.25) & df$h0 %in% c(0.1, 0.5, 0.9) & df$nstar < 2000,]
 g.sd = ggplot() +
   geom_line(data=df.sub, aes(x=Eh, y=SDh, color=factor(ds), group=paste(nstar, ds, h0))) +
   geom_point(data=df.sub[df.sub$t == max(df.sub$t),], size=3, aes(x=Eh, y=SDh, color=factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
   theme_minimal()
 print(g.sd)
+
+g.v0 = ggplot() +
+  geom_line(data=df.sub[df.sub$ds != 0,], aes(x=Eh, y=SDh**2, color=factor(ds), group=paste(nstar, ds, h0))) +
+  geom_line(data=df.sub[df.sub$ds == 0,], alpha=0.1, aes(x=Eh, y=SDh**2, color=factor(ds), group=paste(nstar, ds, h0))) +
+  geom_point(data=df.sub[df.sub$t %in% c(10,999),], size=3, aes(x=Eh, y=SDh**2, color=factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
+  scale_y_log10(breaks = c(1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.25), limits=c(1e-5,0.26)) +
+  theme_minimal() + labs(x = "E(h)", y = "Var(h)", color = "ds", shape = "N") +
+  scale_colour_manual(
+    values = c("#FF8888FF",  "#8888FFFF", "#AAAAAAFF"))
+
+print(g.v0)
 
 g.vp = ggplot() +
   geom_line(data=df, aes(x=Eh, y=Vph, color=factor(ds), group=paste(nstar, ds, h0))) +
@@ -83,15 +95,20 @@ g.vp = ggplot() +
 print(g.vp)
 
 g.vp1 = ggplot() +
-  geom_line(data=df, aes(x=Eh, y=Vph*nstar, color=factor(ds), group=paste(nstar, ds, h0))) +
-  geom_point(data=df[df$t == max(df$t),], size=3, aes(x=Eh, y=Vph*nstar, color = factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
+  geom_line(data=df[df$nstar<2000,], alpha=0.5,aes(x=Eh, y=Vph*nstar, color=factor(ds), group=paste(nstar, ds, h0))) +
+  geom_point(data=df[df$nstar<2000 & df$t %in% c(999),], size=3, aes(x=Eh, y=Vph*nstar, color = factor(ds), shape=factor(nstar), group=paste(ds,h0))) +
   theme_minimal() + ylim(0,100)
-print(g.vp1)
-g.vp1 + scale_y_log10()
+g.vp1p = g.vp1 + scale_y_log10() + labs(x = "E(h)", y = "N × Var'(h)", color = "ds", shape = "N")
 
 sf = 2
 png(paste0("set-illus-", expt, ".png", collapse=""), width=800*sf, height=800*sf, res=72*sf)
 ggarrange(g.ets, g.vts, g.sd, g.vp1 + scale_y_log10(), nrow=2, ncol=2)
+dev.off()
+
+sf = 2
+png(paste0("set-illus2-", expt, ".png", collapse=""), width=800*sf, height=600*sf, res=72*sf)
+ggarrange(g.ets, g.v0ts, g.v0, g.vp1p, nrow=2, ncol=2,
+          labels=c("A", "B", "C", "D"))
 dev.off()
 
 if(expt == "turnover") {
