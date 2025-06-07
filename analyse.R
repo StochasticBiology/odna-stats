@@ -148,10 +148,10 @@ if(expt == "turnover") {
                       elem.plot(dfsub[dfsub$ds == 0 & dfsub$h0 == 0.9,]),
                       elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.5,]),
                       elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.9,]),
-                      labels = c("A", "B", "C", "D"))
+                      labels = c("i", "ii", "iii", "iv"), nrow=1)
   
-  sf = 2
-  png(paste0("set-hist2-", expt, ".png", collapse=""), width=400*sf, height=400*sf, res=72*sf)
+  sf = 3
+  png(paste0("set-hist2-", expt, ".png", collapse=""), width=600*sf, height=200*sf, res=72*sf)
   print(g.illus)
   dev.off()
 }
