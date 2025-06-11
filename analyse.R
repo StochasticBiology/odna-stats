@@ -1,10 +1,10 @@
 library(ggplot2)
 library(ggpubr)
 
-expt = "sample"
+#expt = "sample"
 expt = "turnover"
-expt = "moran"
-expt = "general"
+#expt = "moran"
+#expt = "general"
 
 if(expt == "sample") {
   df = read.csv("output-sample.csv")
@@ -52,6 +52,20 @@ g.ets = ggplot() +
   facet_wrap(~ ds) + labs(x="t", y="E(h)",  shape="N") +guides(colour = "none") +
   theme_minimal()
 g.ets
+
+g.ets.sub = ggplot() +
+  geom_line(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$ds %in% c(-0.125, 0),], aes(x=t, y=Eh, color=factor(ds), group=paste(nstar, h0))) +
+  geom_point(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$ds %in% c(-0.125, 0) & df$t %in% c(150,max(df$t)),], size=3, aes(x=t, y=Eh, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
+  facet_wrap(~ ds) + labs(x="t", y="E(h)",  shape="N") +guides(colour = "none") +
+  theme_minimal()
+g.ets.sub
+
+g.v0ts.sub = ggplot() +
+  geom_line(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$ds %in% c(-0.125, 0),], aes(x=t, y=Vph, color=factor(ds), group=paste(nstar, h0))) +
+  geom_point(data=df[df$nstar < 2000 & !is.na(df$Vph) & df$ds %in% c(-0.125, 0) & df$t %in% c(150,max(df$t)),], size=3, aes(x=t, y=Vph, color=factor(ds), shape=factor(nstar), group=paste(nstar,h0))) +
+  facet_wrap(~ ds) + labs(x="t", y="Var'(h)",  shape="N") +guides(colour = "none") +
+  theme_minimal()
+g.v0ts.sub
 
 g.vts = ggplot() +
   geom_line(data=df, aes(x=t, y=Vph*nstar, color=factor(ds), group=paste(nstar, h0))) +
@@ -111,6 +125,10 @@ ggarrange(g.ets, g.v0ts, g.v0, g.vp1p, nrow=2, ncol=2,
           labels=c("A", "B", "C", "D"))
 dev.off()
 
+png(paste0("set-illus3-", expt, ".png", collapse=""), width=400*sf, height=450*sf, res=72*sf)
+print(g.v0)
+dev.off()
+
 if(expt == "turnover") {
   dfh = read.csv("output-turnover-hist.csv")
   dfsub = dfh[dfh$nstar == 40 & dfh$ds %in% c(-0.25, 0, 0.25) & dfh$t %in% c(0, 9, 99, 999),]
@@ -153,6 +171,17 @@ if(expt == "turnover") {
   sf = 3
   png(paste0("set-hist2-", expt, ".png", collapse=""), width=600*sf, height=200*sf, res=72*sf)
   print(g.illus)
+  dev.off()
+  
+  g.illus.alt = ggarrange(elem.plot(dfsub[dfsub$ds == 0 & dfsub$h0 == 0.5,]),
+                      elem.plot(dfsub[dfsub$ds == 0 & dfsub$h0 == 0.9,]),
+                      elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.5,]),
+                      elem.plot(dfsub[dfsub$ds == -0.25 & dfsub$h0 == 0.9,]),
+                      labels = c("i", "ii", "iii", "iv"), nrow=2, ncol=2)
+  
+  sf = 3
+  png(paste0("set-hist2-alt-", expt, ".png", collapse=""), width=300*sf, height=350*sf, res=72*sf)
+  print(g.illus.alt)
   dev.off()
 }
 
